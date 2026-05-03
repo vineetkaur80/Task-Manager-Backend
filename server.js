@@ -1,95 +1,64 @@
-require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const Task = require('./models/Task');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const morgan = require('morgan');
+const swaggerUi = require('swagger-ui-express');
+
+const connectDB = require('./config/db');
+const swaggerSpec = require('./swagger');
+const { notFound } = require('./middleware/notFound');
+const { errorHandler } = require('./middleware/errorHandler');
+
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const projectRoutes = require('./routes/projectRoutes');
+const taskRoutes = require('./routes/taskRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
+dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
 
-// Middleware
+app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('dev'));
+}
 
-// Routes
-
-// GET /tasks - Get all tasks
-app.get('/tasks', async (req, res) => {
-  try {
-    const tasks = await Task.find();
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API is running',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// GET /tasks/:id - Get a specific task
-app.get('/tasks/:id', async (req, res) => {
-  try {
-    const task = await Task.findById(req.params.id);
-    if (!task) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-    res.json(task);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// POST /tasks - Create a new task
-app.post('/tasks', async (req, res) => {
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+
+const start = async () => {
   try {
-    const { title, description, completed = false } = req.body;
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
-    }
-    const newTask = new Task({
-      title,
-      description: description || '',
-      completed
+    await connectDB();
+    app.listen(PORT, () => {
+      // eslint-disable-next-line no-console
+      console.log(`API listening on port ${PORT}`);
     });
-    const savedTask = await newTask.save();
-    res.status(201).json(savedTask);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    // eslint-disable-next-line no-console
+    console.error('Failed to start server:', err.message);
+    process.exit(1);
   }
-});
+};
 
-// PUT /tasks/:id - Update a task
-app.put('/tasks/:id', async (req, res) => {
-  try {
-    const { title, description, completed } = req.body;
-    const updatedTask = await Task.findByIdAndUpdate(
-      req.params.id,
-      { title, description, completed },
-      { new: true, runValidators: true }
-    );
-    if (!updatedTask) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-    res.json(updatedTask);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// DELETE /tasks/:id - Delete a task
-app.delete('/tasks/:id', async (req, res) => {
-  try {
-    const deletedTask = await Task.findByIdAndDelete(req.params.id);
-    if (!deletedTask) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-    res.json(deletedTask);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Start server
-app.listen(port, () => {
-  console.log(`Task Manager Backend listening at http://localhost:${port}`);
-});
+start();
