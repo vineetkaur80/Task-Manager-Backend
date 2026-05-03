@@ -1,21 +1,37 @@
 {
-  "name": "task-manager-backend",
+  "name": "team-task-manager-backend",
   "version": "1.0.0",
-  "description": "A simple Express.js backend for task management",
-  "main": "server.js",
+  "description": "Backend API for Team Task Manager - Full Stack Assignment",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node -e \"console.log('No tests configured yet. Skipping.');\""
   },
-  "keywords": ["express", "backend", "task-manager", "mongodb"],
+  "keywords": [
+    "task-manager",
+    "express",
+    "mongodb",
+    "rest-api"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "mongoose": "^7.5.0",
-    "dotenv": "^16.3.1"
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.4.1",
+    "morgan": "^1.10.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
