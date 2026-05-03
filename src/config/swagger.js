@@ -8,8 +8,8 @@
         version: '1.0.0',
         description: 'REST API for Team Task Manager — Authentication, Projects, Tasks, Dashboard with Role-Based Access Control. Deployed on Azure App Service (West India).',
         contact: {
-          name: 'Sandeep Vashishtha',
-          url: 'https://github.com/SandeepVashishtha/Team-Task-Manager-Backend',
+          name: 'Vineet Kaur',
+          url: 'https://github.com/VineetKaur80/Team-Task-Manager-Backend',
         },
         license: { name: 'ISC' },
       },
